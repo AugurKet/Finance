@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Exchange Rates Dashboard</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <div class="container">
+    <h1>USD Exchange Rates</h1>
+    <p class="updated" id="updatedTime">Loading...</p>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Currency</th>
+          <th>Code</th>
+          <th>Rate (per 1 USD)</th>
+        </tr>
+      </thead>
+      <tbody id="ratesTable">
+      </tbody>
+    </table>
+
+    <button onclick="loadRates()">Refresh</button>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>

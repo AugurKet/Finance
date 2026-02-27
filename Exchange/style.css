@@ -7,13 +7,12 @@ body {
 }
 
 .container {
-  max-width: 900px;
+  max-width: 1000px;
   margin: auto;
   background: white;
   padding: 20px;
-  border-radius: 10px;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-  transition: 0.3s;
+  border-radius: 12px;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.1);
 }
 
 .top-bar {
@@ -22,46 +21,13 @@ body {
   align-items: center;
 }
 
-.updated {
-  text-align: center;
-  color: #666;
-}
-
-.converter {
-  text-align: center;
-  margin: 15px 0;
-}
-
-.converter input, .converter select {
-  padding: 8px;
-  margin: 5px;
-}
-
-.controls {
-  text-align: center;
-  margin-bottom: 10px;
-}
-
-button {
-  padding: 8px 12px;
-  border: none;
-  background: #3498db;
-  color: white;
-  cursor: pointer;
-  border-radius: 5px;
-}
-
-button:hover {
-  background: #2980b9;
-}
-
 table {
   width: 100%;
   border-collapse: collapse;
 }
 
 th, td {
-  padding: 8px;
+  padding: 10px;
   text-align: center;
 }
 
@@ -74,7 +40,14 @@ tr:nth-child(even) {
   background: #f2f2f2;
 }
 
-/* Dark Mode */
+button, select {
+  padding: 8px;
+  border-radius: 6px;
+  border: none;
+  background: #3498db;
+  color: white;
+}
+
 .dark body {
   background: #121212;
 }
@@ -84,10 +57,7 @@ tr:nth-child(even) {
   color: white;
 }
 
-.dark th {
-  background: #333;
-}
-
-.dark tr:nth-child(even) {
-  background: #2a2a2a;
+.spark {
+  width: 80px;
+  height: 25px;
 }

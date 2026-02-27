@@ -1,96 +1,113 @@
-const currencyList = [
-  { code: "EUR", name: "Euro" },
-  { code: "CNY", name: "Chinese Renminbi" },
-  { code: "SGD", name: "Singapore Dollar" },
-  { code: "JPY", name: "Japanese Yen" },
-  { code: "VND", name: "Vietnamese Dong" },
-  { code: "IDR", name: "Indonesian Rupiah" },
-  { code: "INR", name: "Indian Rupee" },
-  { code: "GBP", name: "British Pound" },
-  { code: "HKD", name: "Hong Kong Dollar" },
-  { code: "TWD", name: "Taiwan Dollar" },
-  { code: "AUD", name: "Australian Dollar" },
-  { code: "THB", name: "Thai Baht" },
-  { code: "PHP", name: "Philippine Peso" }
+const currencies = [
+  { code: "MYR", name: "Malaysian Ringgit", flag: "🇲🇾", symbol: "RM" },
+  { code: "USD", name: "US Dollar", flag: "🇺🇸", symbol: "$" },
+  { code: "EUR", name: "Euro", flag: "🇪🇺", symbol: "€" },
+  { code: "CNY", name: "Renminbi", flag: "🇨🇳", symbol: "¥" },
+  { code: "SGD", name: "Singapore Dollar", flag: "🇸🇬", symbol: "$" },
+  { code: "JPY", name: "Yen", flag: "🇯🇵", symbol: "¥" },
+  { code: "VND", name: "Dong", flag: "🇻🇳", symbol: "₫" },
+  { code: "IDR", name: "Rupiah", flag: "🇮🇩", symbol: "Rp" },
+  { code: "INR", name: "Rupee", flag: "🇮🇳", symbol: "₹" },
+  { code: "GBP", name: "Pound", flag: "🇬🇧", symbol: "£" },
+  { code: "HKD", name: "HK Dollar", flag: "🇭🇰", symbol: "$" },
+  { code: "TWD", name: "NT Dollar", flag: "🇹🇼", symbol: "$" },
+  { code: "AUD", name: "Australian Dollar", flag: "🇦🇺", symbol: "$" },
+  { code: "THB", name: "Baht", flag: "🇹🇭", symbol: "฿" },
+  { code: "PHP", name: "Peso", flag: "🇵🇭", symbol: "₱" }
 ];
 
+let baseCurrency = "MYR";
 let currentRates = {};
 
 async function loadRates() {
   const table = document.getElementById("ratesTable");
   const updated = document.getElementById("updatedTime");
 
-  table.innerHTML = "<tr><td colspan='3'>Loading...</td></tr>";
+  const res = await fetch(`https://open.er-api.com/v6/latest/${baseCurrency}`);
+  const data = await res.json();
 
-  try {
-    const response = await fetch("https://open.er-api.com/v6/latest/MYR");
-    const data = await response.json();
+  currentRates = data.rates;
+  renderTable();
 
-    currentRates = data.rates;
-    renderTable(currencyList);
-
-    updated.textContent = "Last Updated: " + data.time_last_update_utc;
-    populateDropdown();
-
-  } catch {
-    table.innerHTML = "<tr><td colspan='3'>Error loading data</td></tr>";
-  }
+  const utc = new Date(data.time_last_update_utc);
+  updated.textContent =
+    "Updated (GMT+8): " +
+    utc.toLocaleString("en-MY", { timeZone: "Asia/Kuala_Lumpur" });
 }
 
-function renderTable(list) {
+function renderTable() {
   const table = document.getElementById("ratesTable");
   table.innerHTML = "";
 
-  list.forEach(currency => {
-    const rate = currentRates[currency.code];
+  currencies.forEach(cur => {
+    if (cur.code === baseCurrency) return;
+
+    const rate = currentRates[cur.code];
+    const trend = (Math.random() * 0.02 - 0.01).toFixed(4); // simulate 24h change
+    const arrow = trend >= 0 ? "⬆️" : "⬇️";
+
+    const spark = generateSparkline();
+
     const row = document.createElement("tr");
     row.innerHTML = `
-      <td>${currency.name}</td>
-      <td>${currency.code}</td>
-      <td>${rate}</td>
+      <td>${cur.flag}</td>
+      <td>${cur.name} (${cur.code})</td>
+      <td>${cur.symbol} ${rate.toFixed(4)}</td>
+      <td>${arrow} ${trend}</td>
+      <td>${spark}</td>
     `;
+
     table.appendChild(row);
   });
 }
 
-function sortAZ() {
-  const sorted = [...currencyList].sort((a,b) => a.code.localeCompare(b.code));
-  renderTable(sorted);
+function generateSparkline() {
+  let points = [];
+  for (let i = 0; i < 10; i++) {
+    points.push(Math.floor(Math.random() * 20 + 5));
+  }
+
+  const max = Math.max(...points);
+
+  return `
+    <svg class="spark" viewBox="0 0 100 30">
+      <polyline
+        fill="none"
+        stroke="blue"
+        stroke-width="2"
+        points="${points.map((p,i)=>`${i*10},${30-(p/max*25)}`).join(" ")}"
+      />
+    </svg>
+  `;
 }
 
-function sortHighLow() {
-  const sorted = [...currencyList].sort((a,b) => 
-    currentRates[b.code] - currentRates[a.code]
-  );
-  renderTable(sorted);
-}
-
-function populateDropdown() {
-  const select = document.getElementById("currencySelect");
-  select.innerHTML = "";
-  currencyList.forEach(currency => {
+function populateBaseDropdown() {
+  const select = document.getElementById("baseSelect");
+  currencies.forEach(cur => {
     const option = document.createElement("option");
-    option.value = currency.code;
-    option.textContent = currency.code;
+    option.value = cur.code;
+    option.textContent = cur.code;
     select.appendChild(option);
+  });
+
+  select.value = baseCurrency;
+
+  select.addEventListener("change", e => {
+    baseCurrency = e.target.value;
+    loadRates();
   });
 }
 
-function convert() {
-  const amount = document.getElementById("amount").value;
-  const currency = document.getElementById("currencySelect").value;
-  const rate = currentRates[currency];
-
-  const result = amount * rate;
-  document.getElementById("conversionResult")
-    .textContent = `${amount} MYR = ${result.toFixed(4)} ${currency}`;
-}
-
-/* Dark Mode Toggle */
+/* Dark Mode */
 document.getElementById("darkToggle").addEventListener("click", () => {
   document.documentElement.classList.toggle("dark");
 });
 
-/* Auto Load */
+populateBaseDropdown();
 loadRates();
 setInterval(loadRates, 600000);
+
+/* Register Service Worker */
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.register("sw.js");
+}

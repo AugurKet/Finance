@@ -2,41 +2,33 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>MYR Exchange Dashboard</title>
+  <title>Exchange Pro</title>
   <link rel="stylesheet" href="style.css">
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#1e1e1e">
 </head>
 <body>
 
 <div class="container">
 
   <div class="top-bar">
-    <h1>MYR Exchange Rates</h1>
-    <button id="darkToggle">🌙</button>
+    <h1>Exchange Pro</h1>
+    <div>
+      <select id="baseSelect"></select>
+      <button id="darkToggle">🌙</button>
+    </div>
   </div>
 
-  <p id="updatedTime" class="updated"></p>
+  <p id="updatedTime"></p>
 
-  <!-- Converter -->
-  <div class="converter">
-    <input type="number" id="amount" value="1" min="0" step="0.01">
-    <select id="currencySelect"></select>
-    <button onclick="convert()">Convert</button>
-    <p id="conversionResult"></p>
-  </div>
-
-  <!-- Sorting -->
-  <div class="controls">
-    <button onclick="sortAZ()">Sort A–Z</button>
-    <button onclick="sortHighLow()">Sort High–Low</button>
-  </div>
-
-  <!-- Table -->
   <table>
     <thead>
       <tr>
+        <th>Flag</th>
         <th>Currency</th>
-        <th>Code</th>
-        <th>Rate (per 1 MYR)</th>
+        <th>Rate</th>
+        <th>Trend</th>
+        <th>Chart</th>
       </tr>
     </thead>
     <tbody id="ratesTable"></tbody>

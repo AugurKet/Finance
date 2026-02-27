@@ -1,0 +1,15 @@
+{
+  "name": "Exchange Pro",
+  "short_name": "Exchange",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#1e1e1e",
+  "theme_color": "#1e1e1e",
+  "icons": [
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/2331/2331966.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

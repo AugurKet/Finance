@@ -1,57 +1,38 @@
-async function fetchAll() {
-    try {
-        const symbols = [
-            "BTC-USD",
-            "ETH-USD",
-            "GC=F",   // Gold Futures
-            "SI=F",   // Silver Futures
-            "CL=F"    // Oil Futures
-        ];
+const API_KEY = "MQ8P5LTD8Z3CEQTZ";
 
+async function fetchCrypto(fromSymbol, elementId) {
+    try {
         const url =
-            "https://query1.finance.yahoo.com/v7/finance/quote?symbols=" +
-            symbols.join(",");
+            `https://www.alphavantage.co/query?function=CURRENCY_EXCHANGE_RATE&from_currency=${fromSymbol}&to_currency=USD&apikey=${API_KEY}`;
 
         const res = await fetch(url);
         const data = await res.json();
 
-        const results = data.quoteResponse.result;
+        const rate =
+            data["Realtime Currency Exchange Rate"]["5. Exchange Rate"];
 
-        results.forEach(item => {
-            const price = item.regularMarketPrice?.toFixed(2);
+        document.getElementById(elementId).textContent =
+            `$${parseFloat(rate).toLocaleString()}`;
+    } catch (err) {
+        console.error("Crypto error:", err);
+    }
+}
 
-            switch (item.symbol) {
-                case "BTC-USD":
-                    document.getElementById("btc").textContent =
-                        `$${Number(price).toLocaleString()}`;
-                    break;
+async function fetchCommodity(symbol, elementId) {
+    try {
+        const url =
+            `https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=${symbol}&apikey=${API_KEY}`;
 
-                case "ETH-USD":
-                    document.getElementById("eth").textContent =
-                        `$${Number(price).toLocaleString()}`;
-                    break;
+        const res = await fetch(url);
+        const data = await res.json();
 
-                case "GC=F":
-                    document.getElementById("gold").textContent =
-                        `$${price}`;
-                    break;
+        const price =
+            data["Global Quote"]["05. price"];
 
-                case "SI=F":
-                    document.getElementById("silver").textContent =
-                        `$${price}`;
-                    break;
-
-                case "CL=F":
-                    document.getElementById("oil").textContent =
-                        `$${price}`;
-                    break;
-            }
-        });
-
-        updateTime();
-
-    } catch (error) {
-        console.error("Fetch error:", error);
+        document.getElementById(elementId).textContent =
+            `$${parseFloat(price).toFixed(2)}`;
+    } catch (err) {
+        console.error("Commodity error:", err);
     }
 }
 
@@ -69,12 +50,21 @@ function updateTime() {
         hour12: false
     };
 
-    const formatted =
-        new Intl.DateTimeFormat("en-GB", options).format(now);
-
     document.getElementById("lastUpdated").textContent =
-        formatted + " (GMT+8)";
+        now.toLocaleString("en-GB", options) + " (GMT+8)";
+}
+
+async function fetchAll() {
+    await fetchCrypto("BTC", "btc");
+    await fetchCrypto("ETH", "eth");
+
+    // Commodities (futures)
+    await fetchCommodity("GC=F", "gold");
+    await fetchCommodity("SI=F", "silver");
+    await fetchCommodity("CL=F", "oil");
+
+    updateTime();
 }
 
 fetchAll();
-setInterval(fetchAll, 30000);
+setInterval(fetchAll, 60000);

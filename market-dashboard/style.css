@@ -1,0 +1,47 @@
+body {
+    font-family: Arial, sans-serif;
+    background: #0f172a;
+    color: white;
+    text-align: center;
+    margin: 0;
+    padding: 20px;
+}
+
+h1 {
+    margin-bottom: 5px;
+}
+
+.updated {
+    color: #94a3b8;
+    margin-bottom: 20px;
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 20px;
+}
+
+.card {
+    background: #1e293b;
+    padding: 20px;
+    border-radius: 12px;
+    transition: transform 0.2s;
+}
+
+.card:hover {
+    transform: scale(1.05);
+}
+
+.card p {
+    font-size: 24px;
+    font-weight: bold;
+}
+
+.positive {
+    color: #22c55e;
+}
+
+.negative {
+    color: #ef4444;
+}

@@ -1,63 +1,60 @@
-async function fetchCrypto() {
+async function fetchAll() {
     try {
-        const res = await fetch(
-            "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum&vs_currencies=usd&include_24hr_change=true"
-        );
+        const symbols = [
+            "BTC-USD",
+            "ETH-USD",
+            "GC=F",   // Gold Futures
+            "SI=F",   // Silver Futures
+            "CL=F"    // Oil Futures
+        ];
+
+        const url =
+            "https://query1.finance.yahoo.com/v7/finance/quote?symbols=" +
+            symbols.join(",");
+
+        const res = await fetch(url);
         const data = await res.json();
 
-        const btc = data.bitcoin.usd;
-        const btcChange = data.bitcoin.usd_24h_change.toFixed(2);
+        const results = data.quoteResponse.result;
 
-        const eth = data.ethereum.usd;
-        const ethChange = data.ethereum.usd_24h_change.toFixed(2);
+        results.forEach(item => {
+            const price = item.regularMarketPrice?.toFixed(2);
 
-        document.getElementById("btc").textContent = `$${btc.toLocaleString()}`;
-        document.getElementById("eth").textContent = `$${eth.toLocaleString()}`;
+            switch (item.symbol) {
+                case "BTC-USD":
+                    document.getElementById("btc").textContent =
+                        `$${Number(price).toLocaleString()}`;
+                    break;
 
-        updateChange("btcChange", btcChange);
-        updateChange("ethChange", ethChange);
+                case "ETH-USD":
+                    document.getElementById("eth").textContent =
+                        `$${Number(price).toLocaleString()}`;
+                    break;
 
-    } catch (err) {
-        console.error("Crypto error:", err);
-    }
-}
+                case "GC=F":
+                    document.getElementById("gold").textContent =
+                        `$${price}`;
+                    break;
 
-function updateChange(elementId, value) {
-    const el = document.getElementById(elementId);
-    el.textContent = `${value}% (24h)`;
-    el.className = value >= 0 ? "positive" : "negative";
-}
+                case "SI=F":
+                    document.getElementById("silver").textContent =
+                        `$${price}`;
+                    break;
 
-// 🔥 FIXED METALS + OIL
-async function fetchMetals() {
-    try {
-        const proxyUrl = "https://api.allorigins.win/raw?url=";
-        const targetUrl = encodeURIComponent("https://api.metals.live/v1/spot");
-
-        const res = await fetch(proxyUrl + targetUrl);
-        const data = await res.json();
-
-        const prices = {};
-        data.forEach(item => {
-            const key = Object.keys(item)[0];
-            prices[key] = item[key];
+                case "CL=F":
+                    document.getElementById("oil").textContent =
+                        `$${price}`;
+                    break;
+            }
         });
 
-        document.getElementById("gold").textContent =
-            prices.gold ? `$${prices.gold.toFixed(2)}` : "N/A";
+        updateTime();
 
-        document.getElementById("silver").textContent =
-            prices.silver ? `$${prices.silver.toFixed(2)}` : "N/A";
-
-        document.getElementById("oil").textContent =
-            prices.oil ? `$${prices.oil.toFixed(2)}` : "N/A";
-
-    } catch (err) {
-        console.error("Metals error:", err);
+    } catch (error) {
+        console.error("Fetch error:", error);
     }
 }
 
-// 🔥 GMT+8 Timestamp (Malaysia Time)
 function updateTime() {
     const now = new Date();
 
@@ -68,19 +65,15 @@ function updateTime() {
         day: "2-digit",
         hour: "2-digit",
         minute: "2-digit",
-        second: "2-digit"
+        second: "2-digit",
+        hour12: false
     };
 
-    const formatted = new Intl.DateTimeFormat("en-MY", options).format(now);
+    const formatted =
+        new Intl.DateTimeFormat("en-GB", options).format(now);
 
     document.getElementById("lastUpdated").textContent =
         formatted + " (GMT+8)";
-}
-
-async function fetchAll() {
-    await fetchCrypto();
-    await fetchMetals();
-    updateTime();
 }
 
 fetchAll();

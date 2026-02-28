@@ -25,17 +25,16 @@ async function fetchCrypto() {
 function updateChange(elementId, value) {
     const el = document.getElementById(elementId);
     el.textContent = `${value}% (24h)`;
-
-    if (value >= 0) {
-        el.className = "positive";
-    } else {
-        el.className = "negative";
-    }
+    el.className = value >= 0 ? "positive" : "negative";
 }
 
+// 🔥 FIXED METALS + OIL
 async function fetchMetals() {
     try {
-        const res = await fetch("https://api.metals.live/v1/spot");
+        const proxyUrl = "https://api.allorigins.win/raw?url=";
+        const targetUrl = encodeURIComponent("https://api.metals.live/v1/spot");
+
+        const res = await fetch(proxyUrl + targetUrl);
         const data = await res.json();
 
         const prices = {};
@@ -45,23 +44,37 @@ async function fetchMetals() {
         });
 
         document.getElementById("gold").textContent =
-            `$${prices.gold?.toFixed(2) || "-"}`;
+            prices.gold ? `$${prices.gold.toFixed(2)}` : "N/A";
 
         document.getElementById("silver").textContent =
-            `$${prices.silver?.toFixed(2) || "-"}`;
+            prices.silver ? `$${prices.silver.toFixed(2)}` : "N/A";
 
         document.getElementById("oil").textContent =
-            `$${prices.oil?.toFixed(2) || "-"}`;
+            prices.oil ? `$${prices.oil.toFixed(2)}` : "N/A";
 
     } catch (err) {
         console.error("Metals error:", err);
     }
 }
 
+// 🔥 GMT+8 Timestamp (Malaysia Time)
 function updateTime() {
     const now = new Date();
+
+    const options = {
+        timeZone: "Asia/Kuala_Lumpur",
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit"
+    };
+
+    const formatted = new Intl.DateTimeFormat("en-MY", options).format(now);
+
     document.getElementById("lastUpdated").textContent =
-        now.toLocaleString();
+        formatted + " (GMT+8)";
 }
 
 async function fetchAll() {

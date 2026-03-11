@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Market Data Dashboard</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8fafc;
+            color: #0f172a;
+            margin: 0;
+            padding: 40px 20px;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        h1 {
+            text-align: center;
+            color: #1e293b;
+            margin-bottom: 30px;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+        .card {
+            background: #ffffff;
+            padding: 30px 20px;
+            border-radius: 12px;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            text-align: center;
+            text-decoration: none;
+            color: #334155;
+            transition: all 0.2s ease-in-out;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
+            border-color: #cbd5e1;
+            color: #2563eb;
+        }
+        .card h2 {
+            margin: 0;
+            font-size: 1.25rem;
+            font-weight: 600;
+        }
+        .card p {
+            margin: 10px 0 0 0;
+            font-size: 0.875rem;
+            color: #64748b;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Market Data Dashboard</h1>
+        <div class="grid">
+            <a href="https://oilprice.com/" target="_blank" class="card">
+                <h2>Crude Oil</h2>
+                <p>Global oil prices</p>
+            </a>
+            <a href="https://goldprice.org/" target="_blank" class="card">
+                <h2>Gold Price</h2>
+                <p>Live gold spot prices</p>
+            </a>
+            <a href="https://coinmarketcap.com/" target="_blank" class="card">
+                <h2>Crypto Market</h2>
+                <p>Cryptocurrency charts</p>
+            </a>
+            <a href="https://x-rates.com/" target="_blank" class="card">
+                <h2>Forex</h2>
+                <p>Foreign exchange rates</p>
+            </a>
+            
+            <a href="https://www.tradingview.com/" target="_blank" class="card">
+                <h2>Global Equities</h2>
+                <p>S&P 500 & indices</p>
+            </a>
+            <a href="https://tradingeconomics.com/" target="_blank" class="card">
+                <h2>Macro Data</h2>
+                <p>Tariffs & global metrics</p>
+            </a>
+            
+            <a href="https://www.bursamalaysia.com/" target="_blank" class="card">
+                <h2>Local Equities</h2>
+                <p>Malaysian stock market</p>
+            </a>
+            <a href="https://www.edgeprop.my/" target="_blank" class="card">
+                <h2>Real Estate</h2>
+                <p>Property market trends</p>
+            </a>
+        </div>
+    </div>
+</body>
+</html>

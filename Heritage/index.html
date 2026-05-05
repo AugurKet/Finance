@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manulife Heritage Calculator</title>
+    <style>
+        body { font-family: system-ui, -apple-system, sans-serif; padding: 20px; max-width: 1200px; margin: 0 auto; }
+        .input-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px; }
+        .input-group { display: flex; flex-direction: column; }
+        label { font-weight: bold; margin-bottom: 5px; font-size: 14px; }
+        input, select, button { padding: 8px; font-size: 16px; border: 1px solid #ccc; border-radius: 4px; }
+        button { background-color: #00766c; color: white; border: none; cursor: pointer; padding: 10px; font-weight: bold;}
+        button:disabled { background-color: #aaa; cursor: not-allowed; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 14px; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: right; }
+        th { background-color: #f4f4f4; text-align: center; }
+    </style>
+</head>
+<body>
+
+    <h2>Heritage Projection Engine</h2>
+    
+    <div class="input-grid">
+        <div class="input-group">
+            <label>Entry Age</label>
+            <input type="number" id="entryAge" value="51">
+        </div>
+        <div class="input-group">
+            <label>Gender</label>
+            <select id="gender">
+                <option value="Male">Male</option>
+                <option value="Female">Female</option>
+            </select>
+        </div>
+        <div class="input-group">
+            <label>Smoker Status</label>
+            <select id="smoker">
+                <option value="No">No</option>
+                <option value="Yes">Yes</option>
+            </select>
+        </div>
+        <div class="input-group">
+            <label>Face Amount</label>
+            <input type="number" id="faceAmount" value="1000000">
+        </div>
+        <div class="input-group">
+            <label>Annual Premium</label>
+            <input type="number" id="premium" value="30000">
+        </div>
+        <div class="input-group">
+            <label>Multi CI Amount</label>
+            <input type="number" id="multiCiAmount" value="100000">
+        </div>
+        <div class="input-group">
+            <label>Projected ROI (%)</label>
+            <input type="number" id="roi" value="1" step="0.1">
+        </div>
+    </div>
+
+    <button id="calcBtn" disabled>Loading Rates...</button>
+
+    <div id="results">
+        <table id="projectionTable">
+            <thead>
+                <tr>
+                    <th>Pol Year</th>
+                    <th>Age</th>
+                    <th>Beginning</th>
+                    <th>Premium (Nett)</th>
+                    <th>Basic COI</th>
+                    <th>MultiCI COI</th>
+                    <th>Bonuses (W/L/M)</th>
+                    <th>Ending Value</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Rows injected via JavaScript -->
+            </tbody>
+        </table>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

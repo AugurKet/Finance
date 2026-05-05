@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manulife Heritage Calculator</title>
+    <style>
+        :root {
+            --primary: #00A764; /* Manulife Green */
+            --bg-color: #f4f7f6;
+            --container-bg: #ffffff;
+            --text-main: #333333;
+            --border-color: #e1e4e8;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: var(--container-bg);
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        }
+        h1 {
+            color: var(--primary);
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 25px;
+            padding: 15px;
+            background-color: #f9fbfb;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+        }
+        .input-group {
+            flex: 1;
+            min-width: 150px;
+            display: flex;
+            flex-direction: column;
+        }
+        .input-group label {
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-bottom: 5px;
+            color: #555;
+        }
+        .input-group input {
+            padding: 8px 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            font-size: 1rem;
+        }
+        button {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 1rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background-color 0.2s;
+            margin-top: 15px;
+            width: 100%;
+        }
+        button:hover {
+            background-color: #008f55;
+        }
+        .table-wrapper {
+            overflow-x: auto;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+        th, td {
+            padding: 12px 15px;
+            text-align: right;
+            border-bottom: 1px solid var(--border-color);
+        }
+        th {
+            background-color: #f1f3f5;
+            color: #444;
+            font-weight: 600;
+            position: sticky;
+            top: 0;
+        }
+        td:first-child, th:first-child {
+            text-align: center;
+        }
+        tr:hover {
+            background-color: #f9f9f9;
+        }
+        .currency::before {
+            content: "RM ";
+            font-size: 0.8em;
+            color: #888;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Manulife Heritage Calculator (Male, Non-Smoker, 20-Pay)</h1>
+    
+    <div class="controls">
+        <div class="input-group">
+            <label for="entryAge">Entry Age</label>
+            <input type="number" id="entryAge" value="40" min="1" max="60">
+        </div>
+        <div class="input-group">
+            <label for="faceAmount">Face Amount (RM)</label>
+            <input type="number" id="faceAmount" value="1000000" step="10000">
+        </div>
+        <div class="input-group">
+            <label for="premium">Annual Premium (RM)</label>
+            <input type="number" id="premium" value="12000" step="100">
+        </div>
+        <div class="input-group">
+            <label for="roi">Target ROI (%)</label>
+            <input type="number" id="roi" value="3.5" step="0.1">
+        </div>
+    </div>
+    
+    <button onclick="calculateSchedule()">Generate Schedule</button>
+
+    <div class="table-wrapper" style="margin-top: 20px;">
+        <table id="resultTable">
+            <thead>
+                <tr>
+                    <th>Age</th>
+                    <th>Beginning</th>
+                    <th>Premium</th>
+                    <th>Alloc %</th>
+                    <th>Net A/V</th>
+                    <th>Sum At Risk</th>
+                    <th>COI Rate</th>
+                    <th>COI Charge</th>
+                    <th>Admin</th>
+                    <th>Ending A/V</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- JavaScript will populate this -->
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    // Exact Male Non-Smoker COI Rates from PRG
+    const coiRates = {
+        40: 1.9131, 41: 1.4018, 42: 2.1750, 43: 2.1047, 44: 2.3662, 45: 2.5240, 
+        46: 2.6842, 47: 2.8224, 48: 2.5856, 49: 2.9152, 50: 4.7969, 51: 4.4564, 
+        52: 4.8013, 53: 6.0783, 54: 5.8648, 55: 7.6593, 56: 5.0964, 57: 7.2139, 
+        58: 8.4179, 59: 9.4546, 60: 10.5019, 61: 10.4690, 62: 11.4808, 63: 12.4588, 
+        64: 14.7625, 65: 17.3218, 66: 19.4679, 67: 20.2669, 68: 15.0369, 69: 23.0270, 
+        70: 16.5920, 71: 18.0710, 72: 19.5160, 73: 28.1010, 74: 31.6200, 75: 35.9040, 
+        76: 45.7440, 77: 49.3560, 78: 52.9680, 79: 56.5800, 80: 60.1920
+    };
+
+    const formatCurrency = (num) => {
+        return parseFloat(num).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+    };
+
+    function calculateSchedule() {
+        const entryAge = parseInt(document.getElementById('entryAge').value);
+        const faceAmount = parseFloat(document.getElementById('faceAmount').value);
+        const annualPremiumInput = parseFloat(document.getElementById('premium').value);
+        const roi = parseFloat(document.getElementById('roi').value) / 100;
+        
+        const adminCharge = 60; // RM 5/month = RM 60/year
+        const discountFactor = faceAmount >= 1000000 ? 0.8 : 1.0; 
+        
+        let currentBalance = 0;
+        const tbody = document.querySelector('#resultTable tbody');
+        tbody.innerHTML = ''; // Clear previous results
+
+        for (let age = entryAge; age <= 80; age++) {
+            const policyYear = age - entryAge + 1;
+            
+            // Determine 20-Pay Allocation Tier
+            let allocation = 0;
+            let currentPremium = 0;
+            
+            if (policyYear <= 20) {
+                currentPremium = annualPremiumInput;
+                if (policyYear <= 3) allocation = 0.60;
+                else if (policyYear <= 6) allocation = 0.80;
+                else if (policyYear <= 8) allocation = 0.95;
+                else if (policyYear <= 17) allocation = 1.00;
+                else if (policyYear <= 20) allocation = 1.02;
+            }
+
+            // Calculations
+            const beginning = currentBalance;
+            const netAv = beginning + (currentPremium * allocation);
+            const sumAtRisk = Math.max(faceAmount - netAv, 0);
+            
+            // Handle ages beyond available data gracefully
+            const baseCoiRate = coiRates[age] || 0; 
+            const finalCoiRate = baseCoiRate * discountFactor;
+            const coiCharge = (sumAtRisk / 1000) * finalCoiRate;
+            
+            // End of year compound calculation
+            let endingAv = (netAv - coiCharge - adminCharge) * (1 + roi);
+            
+            // Prevent negative balances from breaking the display
+            if (endingAv < 0) endingAv = 0; 
+
+            // Create Table Row
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td><strong>${age}</strong></td>
+                <td class="currency">${formatCurrency(beginning)}</td>
+                <td class="currency">${formatCurrency(currentPremium)}</td>
+                <td>${(allocation * 100).toFixed(0)}%</td>
+                <td class="currency">${formatCurrency(netAv)}</td>
+                <td class="currency">${formatCurrency(sumAtRisk)}</td>
+                <td>${finalCoiRate.toFixed(4)}</td>
+                <td class="currency" style="color: #d93025;">${formatCurrency(coiCharge)}</td>
+                <td class="currency" style="color: #d93025;">${formatCurrency(adminCharge)}</td>
+                <td class="currency" style="font-weight: bold; color: var(--primary);">${formatCurrency(endingAv)}</td>
+            `;
+            tbody.appendChild(tr);
+
+            currentBalance = endingAv;
+            
+            // Stop generating if policy lapses
+            if (currentBalance === 0 && policyYear > 6) { // factoring in 6-year No Lapse Guarantee loosely
+               break; 
+            }
+        }
+    }
+
+    // Run once on load
+    window.onload = calculateSchedule;
+</script>
+
+</body>
+</html>

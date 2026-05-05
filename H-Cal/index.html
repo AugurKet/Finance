@@ -3,14 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Manulife Heritage Calculator</title>
+    <title>Dynamic Manulife Heritage Calculator</title>
     <style>
         :root {
-            --primary: #00A764; /* Manulife Green */
+            --primary: #00A764; 
             --bg-color: #f4f7f6;
             --container-bg: #ffffff;
             --text-main: #333333;
             --border-color: #e1e4e8;
+            --highlight: #e6f6f0;
         }
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -30,7 +31,13 @@
         h1 {
             color: var(--primary);
             text-align: center;
-            margin-bottom: 30px;
+            margin-bottom: 5px;
+        }
+        p.subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 25px;
+            font-size: 0.9rem;
         }
         .controls {
             display: flex;
@@ -64,28 +71,28 @@
             background-color: var(--primary);
             color: white;
             border: none;
-            padding: 10px 20px;
+            padding: 12px 20px;
             font-size: 1rem;
             border-radius: 4px;
             cursor: pointer;
             font-weight: bold;
             transition: background-color 0.2s;
-            margin-top: 15px;
             width: 100%;
+            margin-bottom: 10px;
         }
-        button:hover {
-            background-color: #008f55;
-        }
+        button:hover { background-color: #008f55; }
+        
         .table-wrapper {
             overflow-x: auto;
+            max-height: 600px; /* Makes the table scrollable */
         }
         table {
             width: 100%;
             border-collapse: collapse;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
         }
         th, td {
-            padding: 12px 15px;
+            padding: 8px 10px;
             text-align: right;
             border-bottom: 1px solid var(--border-color);
         }
@@ -95,71 +102,89 @@
             font-weight: 600;
             position: sticky;
             top: 0;
+            z-index: 10;
         }
-        td:first-child, th:first-child {
-            text-align: center;
+        td:first-child, th:first-child { text-align: center; font-weight: bold; }
+        tr:hover { background-color: var(--highlight); }
+        
+        /* Styling for the editable inputs inside the table */
+        td input[type="number"] {
+            width: 80px;
+            padding: 6px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            text-align: right;
+            font-size: 0.85rem;
+            background-color: #fffdf5; /* Light yellow to indicate editability */
+            transition: border-color 0.2s;
         }
-        tr:hover {
-            background-color: #f9f9f9;
+        td input[type="number"]:focus {
+            border-color: var(--primary);
+            outline: none;
         }
         .currency::before {
             content: "RM ";
             font-size: 0.8em;
             color: #888;
         }
+        .readonly-val {
+            font-family: monospace;
+            font-size: 0.9rem;
+        }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h1>Manulife Heritage Calculator (Male, Non-Smoker, 20-Pay)</h1>
+    <h1>Dynamic Manulife Heritage Calculator</h1>
+    <p class="subtitle">Change any field in the grid below to instantly recalculate the policy projection.</p>
     
     <div class="controls">
         <div class="input-group">
-            <label for="entryAge">Entry Age</label>
-            <input type="number" id="entryAge" value="40" min="1" max="60">
+            <label for="entryAge">Entry Age (Resets Grid)</label>
+            <input type="number" id="entryAge" value="40" min="1" max="60" onchange="generateGrid()">
         </div>
         <div class="input-group">
-            <label for="faceAmount">Face Amount (RM)</label>
-            <input type="number" id="faceAmount" value="1000000" step="10000">
+            <label for="faceAmount">Face Amount (Resets Grid)</label>
+            <input type="number" id="faceAmount" value="1000000" step="10000" onchange="generateGrid()">
         </div>
         <div class="input-group">
-            <label for="premium">Annual Premium (RM)</label>
-            <input type="number" id="premium" value="12000" step="100">
+            <label for="basePremium">Default Premium (Resets Grid)</label>
+            <input type="number" id="basePremium" value="12000" step="100" onchange="generateGrid()">
         </div>
         <div class="input-group">
-            <label for="roi">Target ROI (%)</label>
-            <input type="number" id="roi" value="3.5" step="0.1">
+            <label for="roi">Target ROI % (Live Update)</label>
+            <input type="number" id="roi" value="3.5" step="0.1" oninput="recalculate()">
         </div>
     </div>
     
-    <button onclick="calculateSchedule()">Generate Schedule</button>
+    <button onclick="generateGrid()">Reset to Default Schedule</button>
 
-    <div class="table-wrapper" style="margin-top: 20px;">
+    <div class="table-wrapper">
         <table id="resultTable">
             <thead>
                 <tr>
                     <th>Age</th>
                     <th>Beginning</th>
-                    <th>Premium</th>
-                    <th>Alloc %</th>
+                    <th>Premium (Edit)</th>
+                    <th>Alloc % (Edit)</th>
                     <th>Net A/V</th>
                     <th>Sum At Risk</th>
-                    <th>COI Rate</th>
+                    <th>COI Rate (Edit)</th>
                     <th>COI Charge</th>
-                    <th>Admin</th>
+                    <th>Admin (Edit)</th>
                     <th>Ending A/V</th>
                 </tr>
             </thead>
             <tbody>
-                <!-- JavaScript will populate this -->
+                <!-- Rows injected here -->
             </tbody>
         </table>
     </div>
 </div>
 
 <script>
-    // Exact Male Non-Smoker COI Rates from PRG
+    // PRG Base Rates (Male Non-Smoker)
     const coiRates = {
         40: 1.9131, 41: 1.4018, 42: 2.1750, 43: 2.1047, 44: 2.3662, 45: 2.5240, 
         46: 2.6842, 47: 2.8224, 48: 2.5856, 49: 2.9152, 50: 4.7969, 51: 4.4564, 
@@ -170,82 +195,100 @@
         76: 45.7440, 77: 49.3560, 78: 52.9680, 79: 56.5800, 80: 60.1920
     };
 
-    const formatCurrency = (num) => {
-        return parseFloat(num).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
-    };
+    const formatCurrency = (num) => parseFloat(num).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
 
-    function calculateSchedule() {
+    // Step 1: Generate the base inputs based on PRG rules
+    function generateGrid() {
         const entryAge = parseInt(document.getElementById('entryAge').value);
         const faceAmount = parseFloat(document.getElementById('faceAmount').value);
-        const annualPremiumInput = parseFloat(document.getElementById('premium').value);
-        const roi = parseFloat(document.getElementById('roi').value) / 100;
-        
-        const adminCharge = 60; // RM 5/month = RM 60/year
+        const defaultPremium = parseFloat(document.getElementById('basePremium').value);
         const discountFactor = faceAmount >= 1000000 ? 0.8 : 1.0; 
         
-        let currentBalance = 0;
         const tbody = document.querySelector('#resultTable tbody');
-        tbody.innerHTML = ''; // Clear previous results
+        tbody.innerHTML = ''; 
 
         for (let age = entryAge; age <= 80; age++) {
             const policyYear = age - entryAge + 1;
             
-            // Determine 20-Pay Allocation Tier
-            let allocation = 0;
+            // 20-Pay Base Allocation Logic
+            let alloc = 0;
             let currentPremium = 0;
-            
             if (policyYear <= 20) {
-                currentPremium = annualPremiumInput;
-                if (policyYear <= 3) allocation = 0.60;
-                else if (policyYear <= 6) allocation = 0.80;
-                else if (policyYear <= 8) allocation = 0.95;
-                else if (policyYear <= 17) allocation = 1.00;
-                else if (policyYear <= 20) allocation = 1.02;
+                currentPremium = defaultPremium;
+                if (policyYear <= 3) alloc = 60;
+                else if (policyYear <= 6) alloc = 80;
+                else if (policyYear <= 8) alloc = 95;
+                else if (policyYear <= 17) alloc = 100;
+                else if (policyYear <= 20) alloc = 102;
             }
 
-            // Calculations
-            const beginning = currentBalance;
-            const netAv = beginning + (currentPremium * allocation);
-            const sumAtRisk = Math.max(faceAmount - netAv, 0);
-            
-            // Handle ages beyond available data gracefully
+            // Calculate Default COI Rate
             const baseCoiRate = coiRates[age] || 0; 
             const finalCoiRate = baseCoiRate * discountFactor;
-            const coiCharge = (sumAtRisk / 1000) * finalCoiRate;
-            
-            // End of year compound calculation
-            let endingAv = (netAv - coiCharge - adminCharge) * (1 + roi);
-            
-            // Prevent negative balances from breaking the display
-            if (endingAv < 0) endingAv = 0; 
 
-            // Create Table Row
             const tr = document.createElement('tr');
             tr.innerHTML = `
-                <td><strong>${age}</strong></td>
-                <td class="currency">${formatCurrency(beginning)}</td>
-                <td class="currency">${formatCurrency(currentPremium)}</td>
-                <td>${(allocation * 100).toFixed(0)}%</td>
-                <td class="currency">${formatCurrency(netAv)}</td>
-                <td class="currency">${formatCurrency(sumAtRisk)}</td>
-                <td>${finalCoiRate.toFixed(4)}</td>
-                <td class="currency" style="color: #d93025;">${formatCurrency(coiCharge)}</td>
-                <td class="currency" style="color: #d93025;">${formatCurrency(adminCharge)}</td>
-                <td class="currency" style="font-weight: bold; color: var(--primary);">${formatCurrency(endingAv)}</td>
+                <td>${age}</td>
+                <td class="readonly-val currency beginning">0.00</td>
+                <td><input type="number" class="in-prem" value="${currentPremium}" step="100" oninput="recalculate()"></td>
+                <td><input type="number" class="in-alloc" value="${alloc}" step="1" oninput="recalculate()"></td>
+                <td class="readonly-val currency net-av">0.00</td>
+                <td class="readonly-val currency sar">0.00</td>
+                <td><input type="number" class="in-coi" value="${finalCoiRate.toFixed(4)}" step="0.0001" oninput="recalculate()"></td>
+                <td class="readonly-val currency coi-charge" style="color: #d93025;">0.00</td>
+                <td><input type="number" class="in-admin" value="60" step="1" oninput="recalculate()"></td>
+                <td class="readonly-val currency ending" style="font-weight: bold; color: var(--primary);">0.00</td>
             `;
             tbody.appendChild(tr);
-
-            currentBalance = endingAv;
-            
-            // Stop generating if policy lapses
-            if (currentBalance === 0 && policyYear > 6) { // factoring in 6-year No Lapse Guarantee loosely
-               break; 
-            }
         }
+        
+        // Run the math once the grid is drawn
+        recalculate(); 
     }
 
-    // Run once on load
-    window.onload = calculateSchedule;
+    // Step 2: Loop through the grid and calculate the math based on user inputs
+    function recalculate() {
+        const faceAmount = parseFloat(document.getElementById('faceAmount').value);
+        const roi = parseFloat(document.getElementById('roi').value) / 100;
+        
+        let currentBalance = 0;
+        const rows = document.querySelectorAll('#resultTable tbody tr');
+        
+        rows.forEach((row) => {
+            // Read inputs from the current row
+            const premium = parseFloat(row.querySelector('.in-prem').value) || 0;
+            const allocPerc = parseFloat(row.querySelector('.in-alloc').value) || 0;
+            const coiRate = parseFloat(row.querySelector('.in-coi').value) || 0;
+            const adminCharge = parseFloat(row.querySelector('.in-admin').value) || 0;
+            
+            // Beginning Balance
+            row.querySelector('.beginning').textContent = formatCurrency(currentBalance);
+            
+            // Net A/V (Beginning + Allocated Premium)
+            const netAv = currentBalance + (premium * (allocPerc / 100));
+            row.querySelector('.net-av').textContent = formatCurrency(netAv);
+            
+            // Sum At Risk (Face Amount - Net A/V)
+            const sar = Math.max(faceAmount - netAv, 0);
+            row.querySelector('.sar').textContent = formatCurrency(sar);
+            
+            // COI Charge
+            const coiCharge = (sar / 1000) * coiRate;
+            row.querySelector('.coi-charge').textContent = formatCurrency(coiCharge);
+            
+            // Ending A/V = (Net A/V - COI - Admin) * ROI
+            let endingAv = (netAv - coiCharge - adminCharge) * (1 + roi);
+            if (endingAv < 0) endingAv = 0; 
+            
+            row.querySelector('.ending').textContent = formatCurrency(endingAv);
+            
+            // Pass ending balance to the next row
+            currentBalance = endingAv;
+        });
+    }
+
+    // Initialize the application
+    window.onload = generateGrid;
 </script>
 
 </body>

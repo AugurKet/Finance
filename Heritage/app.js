@@ -33,7 +33,20 @@ document.getElementById('calcBtn').addEventListener('click', () => {
     const premium = parseFloat(document.getElementById('premium').value);
     const multiCiAmount = parseFloat(document.getElementById('multiCiAmount').value);
     const roi = parseFloat(document.getElementById('roi').value) / 100;
+    const payingTerm = parseInt(document.getElementById('payingTerm').value); // New variable
     
+    // --- NEW VALIDATION LOGIC ---
+    if ((payingTerm === 6 || payingTerm === 10) && faceAmount < 500000) {
+        alert(`For a ${payingTerm}-year paying term, the minimum Face Amount is RM 500,000.`);
+        return; // Stops the calculation
+    }
+    
+    if (payingTerm === 20 && faceAmount < 750000) {
+        alert("For a 20-year paying term, the minimum Face Amount is RM 750,000.");
+        return; // Stops the calculation
+    }
+    // -----------------------------
+
     const tbody = document.querySelector('#projectionTable tbody');
     tbody.innerHTML = ''; // Clear previous results
 
@@ -45,13 +58,19 @@ document.getElementById('calcBtn').addEventListener('click', () => {
         let currentAge = entryAge + year - 1;
         let beginningValue = year === 1 ? 0 : accountValue * (1 + roi);
 
+        // --- NEW PREMIUM PAYMENT LOGIC ---
+        // Only inject premium if we are still within the paying term
+        let isPayingTerm = year <= payingTerm;
+        let currentPremium = isPayingTerm ? premium : 0;
+
         // Premium Allocation Logic
         let allocationRate = 1.0;
         if (year >= 1 && year <= 3) allocationRate = 0.60;
         else if (year >= 4 && year <= 6) allocationRate = 0.80;
         else if (year >= 7 && year <= 8) allocationRate = 0.95; 
         
-        let nettPremium = premium * allocationRate;
+        let nettPremium = currentPremium * allocationRate;
+        // ---------------------------------
 
         // COI Calculation
         let rawCoiRate = getRate(coiData, currentAge, gender, smoker);
@@ -71,7 +90,6 @@ document.getElementById('calcBtn').addEventListener('click', () => {
         // Bonuses (Simplified placeholders - adjust to match exact Excel formula logic)
         let loyalty = 0;
         if ([85, 90, 95].includes(currentAge)) loyalty = faceAmount * 0.10;
-        // Add additional Loyalty conditions here based on entry age...
 
         let wellness = 0;
         if (year === 10) wellness = 0.10 * pastCoiDeductions.slice(-10).reduce((a, b) => a + b, 0);

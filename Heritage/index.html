@@ -33,7 +33,7 @@ Promise.all([
 function getRate(data, age, gender, smoker) {
     const row = data.find(r => r.Age === age);
     if (!row) return 0;
-    const key = ${gender} ${smoker === 'No' ? 'Non-Smoker' : 'Smoker'};
+    const key = `${gender} ${smoker === 'No' ? 'Non-Smoker' : 'Smoker'}`;
     return row[key] || 0;
 }
 
@@ -105,11 +105,11 @@ document.getElementById('calcBtn').addEventListener('click', () => {
             else if (year === 4) allocationRate = 0.90;
             else if (year === 5) allocationRate = 0.98;
             else if (year >= 6) allocationRate = 1.00;
-        }
-               else if (payingTerm === 20) {
+        } 
+        else if (payingTerm === 20) {
             if (year >= 1 && year <= 3) allocationRate = 0.60;
             else if (year >= 4 && year <= 6) allocationRate = 0.80;
-            else if (year >= 7 && year <= 8) allocationRate = 0.95; 
+            else if (year >= 7 && year <= 😎 allocationRate = 0.95; 
             else allocationRate = 1.00;
         }
         // --------------------------------------------
@@ -164,4 +164,3 @@ document.getElementById('calcBtn').addEventListener('click', () => {
         tbody.appendChild(tr);
     }
 });
-               

@@ -1,4 +1,4 @@
-let coiData = [];
+let coiData = []; 
 let multiCiData = [];
 
 // Helper function to format numbers with commas (e.g., 1,234.56)

@@ -230,6 +230,15 @@
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
 
+        // ... (your imports and firebaseConfig above stay the same) ...
+
+        console.log("Tracker 1: Bouncer script started");
+        
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        
+        console.log("Tracker 2: Firebase initialized successfully");
+        
         // Check if the user is authorized. If not, kick them back to the root login page.
         onAuthStateChanged(auth, (user) => {
             if (!user) {

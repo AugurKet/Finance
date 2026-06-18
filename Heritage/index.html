@@ -210,44 +210,7 @@
     </div>
 
     <script src="app.js"></script>
-
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
-
-        // ==========================================
-        // PASTE YOUR FIREBASE CONFIG HERE
-        // ==========================================
-        const firebaseConfig = {
-          apiKey: "AIzaSyDyRAvXx4a5hzXfLxUVPOUlotZOvih5WQU",
-          authDomain: "agency-database-93daf.firebaseapp.com",
-          projectId: "agency-database-93daf",
-          storageBucket: "agency-database-93daf.firebasestorage.app",
-          messagingSenderId: "72806352387",
-          appId: "1:72806352387:web:501ee6f972f880f0803036"
-        };
-
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-
-        // ... (your imports and firebaseConfig above stay the same) ...
-
-        console.log("Tracker 1: Bouncer script started");
-        
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        
-        console.log("Tracker 2: Firebase initialized successfully");
-        
-        // Check if the user is authorized. If not, kick them back to the root login page.
-        onAuthStateChanged(auth, (user) => {
-            if (!user) {
-                // The '/' ensures it always points to the main login.html at the root domain
-                window.location.href = "/login.html"; 
-            }
-        });
-    </script>
-    
+      
 </body>
 </html>
 

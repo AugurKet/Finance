@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manulife Heritage Calculator</title>
+    <style>
+        :root {
+            --primary-color: #00766c; /* Manulife Green */
+            --primary-hover: #005a52;
+            --bg-color: #f4f6f8;
+            --card-bg: #ffffff;
+            --text-color: #333333;
+            --border-color: #e0e0e0;
+            --error-color: #d32f2f;
+        }
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            padding: 40px 20px;
+            margin: 0;
+            line-height: 1.6;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: var(--card-bg);
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.05), 0 2px 4px rgba(0,0,0,0.05);
+        }
+        h2 {
+            color: var(--primary-color);
+            margin-top: 0;
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 15px;
+            margin-bottom: 30px;
+            font-weight: 700;
+        }
+        .input-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 24px;
+            margin-bottom: 35px;
+        }
+        .input-group label {
+            display: block;
+            font-size: 13px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            color: #555;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .input-group input, .input-group select {
+            width: 100%;
+            padding: 12px 14px;
+            font-size: 16px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            box-sizing: border-box;
+            background-color: #fafafa;
+            transition: all 0.2s ease;
+        }
+        .input-group input:focus, .input-group select:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            background-color: #fff;
+            box-shadow: 0 0 0 3px rgba(0, 118, 108, 0.15);
+        }
+        button {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 14px 28px;
+            font-size: 16px;
+            font-weight: bold;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.2s, transform 0.1s;
+            display: inline-block;
+        }
+        button:hover:not(:disabled) {
+            background-color: var(--primary-hover);
+        }
+        button:active:not(:disabled) {
+            transform: scale(0.98);
+        }
+        button:disabled {
+            background-color: #b0c4c2;
+            cursor: not-allowed;
+        }
+        .table-container {
+            margin-top: 40px;
+            overflow-x: auto;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: right;
+            font-variant-numeric: tabular-nums;
+        }
+        th {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 16px 12px;
+            font-size: 14px;
+            font-weight: 600;
+            text-align: right;
+            position: sticky;
+            top: 0;
+            white-space: nowrap;
+        }
+        th:nth-child(1), th:nth-child(2), td:nth-child(1), td:nth-child(2) {
+            text-align: center;
+        }
+        td {
+            padding: 14px 12px;
+            border-bottom: 1px solid var(--border-color);
+            color: #444;
+            font-size: 15px;
+        }
+        tr:hover td {
+            background-color: rgba(0, 118, 108, 0.04);
+        }
+        tr:last-child td {
+            border-bottom: none;
+        }
+        td strong {
+            color: var(--primary-color);
+            font-size: 1.1em;
+        }
+
+        /* Modal Styles */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(4px);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            animation: fadeIn 0.2s ease;
+        }
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            max-width: 400px;
+            width: 90%;
+            text-align: center;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            animation: slideUp 0.3s ease;
+            border-top: 5px solid var(--error-color);
+        }
+        .modal-content h3 {
+            margin-top: 0;
+            color: var(--error-color);
+            font-size: 22px;
+        }
+        .modal-content p {
+            color: #555;
+            font-size: 16px;
+            margin-bottom: 25px;
+        }
+        .modal-btn {
+            background-color: var(--primary-color);
+            width: 100%;
+        }
+
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h2>Heritage Projection Engine</h2>
+        
+        <div class="input-grid">
+            <div class="input-group">
+                <label>Entry Age</label>
+                <input type="number" id="entryAge" value="30">
+            </div>
+            <div class="input-group">
+                <label>Gender</label>
+                <select id="gender">
+                    <option value="Male">Male</option>
+                    <option value="Female">Female</option>
+                </select>
+            </div>
+            <div class="input-group">
+                <label>Smoker Status</label>
+                <select id="smoker">
+                    <option value="No">No</option>
+                    <option value="Yes">Yes</option>
+                </select>
+            </div>
+            <div class="input-group">
+                <label>Paying Term</label>
+                <select id="payingTerm">
+                    <option value="6">6 Years</option>
+                    <option value="10">10 Years</option>
+                    <option value="20" selected>20 Years</option>
+                </select>
+            </div>
+            <div class="input-group">
+                <label>Face Amount</label>
+                <input type="number" id="faceAmount" value="1000000">
+            </div>
+            <div class="input-group">
+                <label>Annual Premium</label>
+                <input type="number" id="premium" value="12000">
+            </div>
+            <div class="input-group">
+                <label>Multi CI Amount</label>
+                <input type="number" id="multiCiAmount" value="100000">
+            </div>
+            <div class="input-group">
+                <label>Projected ROI (%)</label>
+                <input type="number" id="roi" value="1" step="0.1">
+            </div>
+        </div>
+
+        <button id="calcBtn" disabled>Loading Rates...</button>
+
+        <div class="table-container">
+            <table id="projectionTable">
+                <thead>
+                    <tr>
+                        <th>Pol Year</th>
+                        <th>Age</th>
+                        <th>Beginning</th>
+                        <th>Premium (Nett)</th>
+                        <th>Basic COI</th>
+                        <th>MultiCI COI</th>
+                        <th>Bonuses (W/L/M)</th>
+                        <th>Ending Value</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Rows injected via JavaScript -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Custom Modal Popup -->
+    <div class="modal-overlay" id="validationModal">
+        <div class="modal-content">
+            <h3>Input Error</h3>
+            <p id="modalMessage">Validation message goes here.</p>
+            <button class="modal-btn" onclick="closeModal()">Review Inputs</button>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+
+        <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
+
+        // ==========================================
+        // PASTE YOUR FIREBASE CONFIG HERE
+        // ==========================================
+        const firebaseConfig = {
+          apiKey: "AIzaSyDyRAvXx4a5hzXfLxUVPOUlotZOvih5WQU",
+          authDomain: "agency-database-93daf.firebaseapp.com",
+          projectId: "agency-database-93daf",
+          storageBucket: "agency-database-93daf.firebasestorage.app",
+          messagingSenderId: "72806352387",
+          appId: "1:72806352387:web:501ee6f972f880f0803036"
+        };
+
+       // ... your firebaseConfig ends above this ...
+        
+
+        // 1. Initialize Firebase JUST ONCE, with a safe nickname
+        const bouncerApp = initializeApp(firebaseConfig);
+        const auth = getAuth(bouncerApp);
+
+        // 2. The Bouncer checks your ID
+        onAuthStateChanged(auth, (user) => {
+            if (!user) {
+                // Kicks them back to the root login page
+                window.location.href = "/login.html";
+            }
+        });
+        
+        // Check if the user is authorized. If not, kick them back to the root login page.
+        onAuthStateChanged(auth, (user) => {
+            if (!user) {
+                // The '/' ensures it always points to the main login.html at the root domain
+                window.location.href = "/login.html"; 
+            }
+        });
+    </script>
+    
+</body>
+</html>
